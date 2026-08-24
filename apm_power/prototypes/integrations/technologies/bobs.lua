@@ -33,7 +33,8 @@ if mods.bobmining then
 	apm.lib.utils.technology.add.prerequisites('bob-water-miner-1', 'apm_electric_mining_drills')
 	apm.lib.utils.technology.add.prerequisites('bob-pumpjacks-1', 'apm_electric_mining_drills')
 	apm.lib.utils.technology.add.prerequisites('bob-pumpjacks-1', 'logistic-science-pack')
-	apm.lib.utils.technology.add.prerequisites('bob-steel-axe-2', 'logistic-science-pack')
+    apm.lib.utils.technology.add.prerequisites('bob-steel-axe-2', 'logistic-science-pack')
+	apm.lib.utils.technology.delete("electric-mining-drill")
 end
 
 --- [bobrevamp]
