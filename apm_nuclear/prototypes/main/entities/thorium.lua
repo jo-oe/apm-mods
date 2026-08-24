@@ -9,17 +9,20 @@ APM_LOG_HEADER(self)
 
 local resource_autoplace = require("__core__.lualib.resource-autoplace")
 
----@type AutoplaceControl
-local autoplace_control = {
+if not mods["Clowns-Processing"] then
+    ---@type AutoplaceControl
+    local autoplace_control = {
 	type = "autoplace-control",
 	name = "thorium-ore",
 	localised_name = {"", "[entity=thorium-ore] ", {"entity-name.thorium-ore"}},
 	richness = true,
 	order = "b",
 	category = "resource",
-}
+    }
 
-data:extend({ autoplace_control })
+    data:extend({ autoplace_control })
+end
+
 
 ---@type ResourceEntityPrototype
 -- local resource = {
