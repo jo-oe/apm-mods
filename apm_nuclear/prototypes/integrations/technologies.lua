@@ -117,7 +117,9 @@ if mods["apm_power_ldinc"] then
 	apm.lib.utils.technology.remove.prerequisites("rocket-silo", "concrete")
 	apm.lib.utils.technology.remove.prerequisites("rocket-silo", "utility-science-pack")
 	apm.lib.utils.technology.remove.prerequisites("space-science-pack", "apm_nuclear_rtg")
-	apm.lib.utils.technology.set.heritage_science_packs_from_prerequisites("rocket-silo")
+	if not mods["angelsindustries"] then
+	    apm.lib.utils.technology.set.heritage_science_packs_from_prerequisites("rocket-silo")
+	end
 
 	if mods["space-age"] then
 		apm.lib.utils.technology.add.prerequisites("fission-reactor-equipment", "nuclear-fuel-reprocessing")
