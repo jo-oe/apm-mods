@@ -141,3 +141,7 @@ end
 if mods.bobgreenhouse then
 	apm.lib.utils.technology.add.prerequisites('bob-greenhouse', 'apm_power_electricity')
 end
+
+if mods.angelsindustries then
+	apm.lib.utils.technology.remove.prerequisites('apm_water_supply-2', 'electric-engine')
+end
