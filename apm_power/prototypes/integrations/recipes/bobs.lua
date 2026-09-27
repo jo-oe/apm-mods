@@ -85,8 +85,8 @@ end
 --- [bobelectronics]
 if mods.bobelectronics then
 	if mods.angelsrefining then
-		apm.lib.utils.recipe.ingredient.mod('angels-clarifier', 'electronic-circuit', 0)
-		apm.lib.utils.recipe.ingredient.mod('angels-clarifier', 'bob-basic-circuit-board', 4)
+		--apm.lib.utils.recipe.ingredient.mod('angels-clarifier', 'electronic-circuit', 0)
+		--apm.lib.utils.recipe.ingredient.mod('angels-clarifier', 'bob-basic-circuit-board', 4)
 	end
 
 	if not mods.boblogistics then
