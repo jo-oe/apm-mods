@@ -19,7 +19,7 @@ apm.lib.utils.autoplace_controls.add.ore("copper-ore", 0.3, 1, 1.2)
 apm.lib.utils.autoplace_controls.add.ore("stone", 0.25, 1, 1)
 apm.lib.utils.autoplace_controls.add.ore("crude-oil", 0.15, 2.5, 2.5)
 
-if mods["apm_nuclear_ldinc"] then
+if mods["apm_nuclear_ldinc"] and not mods["Clowns-Processing"] then
     apm.lib.utils.autoplace_controls.add.ore("thorium-ore", 0.3, 1, 1)
 end
 
