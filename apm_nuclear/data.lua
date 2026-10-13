@@ -16,7 +16,10 @@ require('prototypes.main.items.hexafluoride')
 require('prototypes.main.items.pellets')
 require('prototypes.main.items.uranium')
 require('prototypes.main.items.mox')
-require('prototypes.main.items.thorium')
+
+if not mods["Clowns-Processing"] then
+    require('prototypes.main.items.thorium')
+end
 require('prototypes.main.items.neptunium')
 require('prototypes.main.items.waste')
 require('prototypes.main.items.ore')
