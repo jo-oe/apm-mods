@@ -17,9 +17,7 @@ require('prototypes.main.items.pellets')
 require('prototypes.main.items.uranium')
 require('prototypes.main.items.mox')
 
-if not mods["Clowns-Processing"] then
-    require('prototypes.main.items.thorium')
-end
+require('prototypes.main.items.thorium')
 require('prototypes.main.items.neptunium')
 require('prototypes.main.items.waste')
 require('prototypes.main.items.ore')
@@ -33,7 +31,10 @@ require('prototypes.main.equipment.rtg')
 
 require('prototypes.main.descriptions')
 
-require('prototypes.main.entities.thorium')
+if not mods["Clowns-Processing"] then
+    require('prototypes.main.entities.thorium')
+end
+
 require('prototypes.main.entities.overwrite')
 require('prototypes.main.entities.breeder_reactor')
 require('prototypes.main.entities.cooling_pond')
