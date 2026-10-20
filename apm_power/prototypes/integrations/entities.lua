@@ -55,6 +55,11 @@ apm.lib.utils.car.overhaul_all()
 --
 -- ----------------------------------------------------------------------------
 
+local entity, ok = apm.lib.utils.entity.get.by_name("offshore-pump", "offshore-pump")
+if ok then
+	apm.lib.utils.entity.set.hidden(entity)
+end
+
 -- AlternativeSteam -----------------------------------------------------------
 --
 --
@@ -263,4 +268,19 @@ end
 --- [Muluna]
 if mods["planet-muluna"] then
 	require("prototypes.integrations.entities.muluna")
+end
+
+
+if mods["Smart_Inserters"] then
+	local inserter, ok = apm.lib.utils.entity.get.by_name("apm_steam_inserter_long", "inserter")
+
+	if ok then
+		apm.lib.utils.entity.set.hidden(inserter)
+	end
+
+	inserter, ok = apm.lib.utils.entity.get.by_name("apm_burner_long_inserter", "inserter")
+
+	if ok then
+		apm.lib.utils.entity.set.hidden(inserter)
+	end
 end

@@ -11,7 +11,7 @@ end
 apm = { lib = { features = { stack_size = { ash = 100 }, runtime = {} } } }
 storage = {}
 defines = {
-	entity_status = { working = 1, no_fuel = 2 },
+	entity_status = { working = 1, no_fuel = 2, waiting_for_source_items = 3 },
 	inventory = { chest = 1 },
 }
 remote = { add_interface = function() end }
@@ -34,7 +34,7 @@ local function Inventory(stacks)
 		slots[i] = { name = s[1], quality = s[2] or "normal", count = s[3] }
 	end
 
-	local inv = {}
+	local inv = { valid = true }
 	local function q(def) return def.quality or "normal" end
 
 	inv.remove = function(def)
@@ -107,6 +107,7 @@ local function Machine(fuel, burnt)
 	local fuel_inv, burnt_inv = Inventory(fuel), Inventory(burnt)
 	return {
 		valid = true,
+		name = "stone-furnace",
 		type = "furnace",
 		position = { x = 0, y = 0 },
 		burner = { fuel_categories = { chemical = true }, burnt_result_inventory = burnt_inv },
@@ -119,12 +120,15 @@ local function Machine(fuel, burnt)
 	}
 end
 
+local WAITING = defines.entity_status.waiting_for_source_items
+
 local force = { index = 1, inserter_stack_size_bonus = 2, bulk_inserter_capacity_bonus = 10 }
 
 local function Inserter(own_fuel, status, pickup, drop, held)
 	local fuel_inv = Inventory(own_fuel)
 	return {
 		valid = true,
+		name = "burner-inserter",
 		type = "inserter",
 		unit_number = 1,
 		force = force,
@@ -171,7 +175,7 @@ end
 -- 1. fuel chaining keeps the quality (it used to put normal coal in the hand and remove nothing)
 do
 	local pickup, drop = Machine({ { "coal", "uncommon", 10 } }), Machine({})
-	local ins = Inserter({ { "coal", "normal", 1 } }, nil, pickup, drop)
+	local ins = Inserter({ { "coal", "normal", 1 } }, WAITING, pickup, drop)
 	run(ins)
 	expect("chain: hand holds uncommon coal", ins.held_stack.quality, "uncommon")
 	expect("chain: hand count = 1 + stack bonus", ins.held_stack.count, 3)
@@ -231,7 +235,7 @@ end
 -- 3e. hand away from the pickup with fuel: left alone (no chaining mid-swing)
 do
 	local pickup, drop = Machine({ { "coal", "uncommon", 10 } }), Machine({})
-	local ins = Inserter({ { "coal", "normal", 1 } }, nil, pickup, drop)
+	local ins = Inserter({ { "coal", "normal", 1 } }, WAITING, pickup, drop)
 	ins.held_stack_position = { x = 1, y = 0 }
 	run(ins)
 	expect("moving hand: no chaining", pickup.fuel_inv.count_of("coal", "uncommon"), 10)
@@ -240,7 +244,7 @@ end
 -- 4. burnt results keep their quality
 do
 	local pickup, drop = Machine({ { "coal", "normal", 2 } }, { { "apm_generic_ash", "rare", 4 } }), Machine({})
-	local ins = Inserter({ { "coal", "normal", 1 } }, nil, pickup, drop)
+	local ins = Inserter({ { "coal", "normal", 1 } }, WAITING, pickup, drop)
 	run(ins)
 	expect("burnt: rare ash in hand", ins.held_stack.quality, "rare")
 	expect("burnt: 3 in hand", ins.held_stack.count, 3)
@@ -250,7 +254,7 @@ end
 -- 5. a busy hand is left alone (no merge, no duplication)
 do
 	local pickup, drop = Machine({ { "coal", "normal", 2 } }, { { "apm_generic_ash", "normal", 4 } }), Machine({})
-	local ins = Inserter({ { "coal", "normal", 1 } }, nil, pickup, drop, HeldStack("apm_generic_ash", "normal", 1))
+	local ins = Inserter({ { "coal", "normal", 1 } }, WAITING, pickup, drop, HeldStack("apm_generic_ash", "normal", 1))
 	run(ins)
 	expect("busy: hand unchanged", ins.held_stack.count, 1)
 	expect("busy: burnt untouched", pickup.burnt_inv.count_of("apm_generic_ash", "normal"), 4)
@@ -259,7 +263,7 @@ end
 -- 6. a quality-only filter (no item name) does not crash; blacklisted ash stays
 do
 	local pickup, drop = Machine({ { "coal", "normal", 2 } }, { { "apm_generic_ash", "normal", 4 } }), Machine({})
-	local ins = Inserter({ { "coal", "normal", 1 } }, nil, pickup, drop)
+	local ins = Inserter({ { "coal", "normal", 1 } }, WAITING, pickup, drop)
 	ins.filter_slot_count = 2
 	ins.inserter_filter_mode = "blacklist"
 	ins.get_filter = function(i)
@@ -268,6 +272,95 @@ do
 	end
 	run(ins)
 	expect("filter: blacklisted ash not taken", pickup.burnt_inv.count_of("apm_generic_ash", "normal"), 4)
+end
+
+-- 7. the burner's fuel categories are read once per entity name (LuaBurner::fuel_categories
+-- builds a new table on every read)
+do
+	local reads = 0
+	local function counted(entity)
+		local burner = entity.burner
+		entity.burner = nil
+		return setmetatable(entity, {
+			__index = function(_, k)
+				if k == "burner" then
+					reads = reads + 1
+					return burner
+				end
+			end
+		})
+	end
+	for _ = 1, 3 do
+		local pickup = Machine({}, {})
+		local drop = Machine({ { "coal", "normal", 10 } })
+		local ins = counted(Inserter({}, nil, pickup, drop))
+		ins.name = "cached-inserter"
+		run(ins)
+		expect("cache: still leeches", ins.fuel_inv.count_of("coal", "normal"), 5)
+	end
+	expect("cache: burner of the inserter read once", reads, 1)
+end
+
+-- 8. a working inserter is left alone: not even its targets or positions are read
+do
+	local reads = 0
+	local pickup, drop = Machine({ { "coal", "uncommon", 10 } }), Machine({})
+	local ins = Inserter({ { "coal", "normal", 1 } }, nil, pickup, drop)
+	local fields = {}
+	for _, k in ipairs({ "pickup_target", "drop_target", "pickup_position", "held_stack_position" }) do
+		fields[k] = ins[k]
+		ins[k] = nil
+	end
+	setmetatable(ins, {
+		__index = function(_, k)
+			if fields[k] ~= nil then reads = reads + 1 end
+			return fields[k]
+		end
+	})
+	run(ins)
+	expect("working: nothing read", reads, 0)
+	expect("working: no chaining", pickup.fuel_inv.count_of("coal", "uncommon"), 10)
+end
+
+-- 9. target inventories and the pickup position are read once while the targets stay the same
+do
+	local calls = 0
+	local pickup, drop = Machine({ { "coal", "normal", 10 } }, { { "apm_generic_ash", "normal", 1 } }),
+			Machine({ { "coal", "normal", 10 } })
+	pickup.unit_number, drop.unit_number = 11, 12
+	for _, m in ipairs({ pickup, drop }) do
+		local fuel_get, burnt_get = m.get_fuel_inventory, m.get_burnt_result_inventory
+		m.get_fuel_inventory = function()
+			calls = calls + 1; return fuel_get()
+		end
+		m.get_burnt_result_inventory = function()
+			calls = calls + 1; return burnt_get()
+		end
+	end
+	local ins = Inserter({ { "coal", "normal", 1 } }, WAITING, pickup, drop)
+	local position_reads = 0
+	local pickup_position = ins.pickup_position
+	ins.pickup_position = nil
+	setmetatable(ins, {
+		__index = function(_, k)
+			if k == "pickup_position" then
+				position_reads = position_reads + 1; return pickup_position
+			end
+		end
+	})
+	storage = {}
+	inserter_script.alloc_defenitions()
+	local st = storage.inserters.settings
+	st.fn_enabled, st.batch_size, st.valid_targets, st.ash_chaining = true, 1, { furnace = true }, false
+	dllist.add(storage.inserters.queue, {
+		id = 1, entity = ins, fuel_inventory = ins.get_fuel_inventory(), bulk = false, err = 0,
+	})
+	for tick = 1, 5 do
+		ins.held_stack = HeldStack() -- the hand was emptied at the drop
+		inserter_script.on_tick(tick)
+	end
+	expect("cache: 2 inventories per target, read once", calls, 4)
+	expect("cache: pickup position read once", position_reads, 1)
 end
 
 print("inserter.test.lua: ALL TESTS PASSED")

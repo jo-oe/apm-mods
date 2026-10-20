@@ -3,16 +3,15 @@
 --
 -- ----------------------------------------------------------------------------
 data:extend({
-	{ type = "string-setting", name = "apm_lib_log_level", setting_type = "startup", allow_blank = false, allowed_values = { "0: Error", "1: Warning", "2: Info" }, default_value = "0: Error", order = "aa_a" },
-	-- {
-	-- 	type          = "string-setting",
-	-- 	name          = "apm_lib_player_items",
-	-- 	setting_type  = "startup",
-	-- 	allow_blank   = true,
-	-- 	default_value =
-	-- 	'apm_assembling_machine_0:10 burner-mining-drill:10 apm_coke:400 wood:200 stone:100 burner-inserter:10 personal-roboport-equipment:1 battery-equipment:1 apm_zx80_construction_robot:5 modular-armor:1 apm_equipment_burner_generator_basic:1',
-	-- 	order         = 'aa_a'
-	-- },
+	{
+		type = "string-setting",
+		name = "apm_lib_log_level",
+		setting_type = "startup",
+		allow_blank = false,
+		allowed_values = { "0: Error", "1: Warning", "2: Info" },
+		default_value = "0: Error",
+		order = "aa_a",
+	},
 	--- [apm_lib_stack_size]
 	{
 		type = "int-setting",
@@ -34,6 +33,15 @@ data:extend({
 		allowed_values = { 50, 100, 200, 400, 800, 1000, 2000 },
 		order = "de_a",
 	},
+	---@type ModBoolSettingPrototype
+	{
+		type = "bool-setting",
+		name = "apm_lib_resort_science_packs_functions",
+		setting_type = "startup",
+		default_value = false,
+		order =
+		"aa_a"
+	}
 })
 
 -- runtime-global -------------------------------------------------------------
@@ -68,7 +76,7 @@ data:extend({
 	{ type = "bool-setting",   name = "apm_lib_storage_spit_out_mark_deconstruct", setting_type = "runtime-global", default_value = true,                                                           order = "ab_b" },
 	{ type = "bool-setting",   name = "apm_lib_radiation_dmg",                     setting_type = "runtime-global", default_value = true,                                                           order = "ac_a" },
 	{ type = "double-setting", name = "apm_lib_radiation_dmg_multiplier",          setting_type = "runtime-global", minimum_value = 0.1,                                                            default_value = 1.0, order = "ac_b" },
-	{ type = "bool-setting",   name = "apm_lib_radiation_dmg_based_on_stack",      setting_type = "runtime-global", default_value = false,                                                          order = "ac_a" },
+	{ type = "bool-setting",   name = "apm_lib_radiation_dmg_based_on_stack",      setting_type = "runtime-global", default_value = true,                                                           order = "ac_a" },
 })
 
 -- runtime-per-user -----------------------------------------------------------

@@ -52,6 +52,9 @@ require "lib.utils.entities"
 if not apm.lib.utils.equipment then apm.lib.utils.equipment = {} end
 require "lib.utils.equipment"
 
+if not apm.lib.utils.armor then apm.lib.utils.armor = {} end
+require "lib.utils.armor"
+
 if not apm.lib.utils.boiler then apm.lib.utils.boiler = {} end
 require "lib.utils.boiler"
 
@@ -122,7 +125,6 @@ if not apm.lib.utils.builder then apm.lib.utils.builder = {} end
 require "lib.utils.builder"
 
 if not apm.lib.utils.patch then apm.lib.utils.patch = {} end
-require "lib.utils.patch.aai"
 
 if not apm.lib.utils.builders then apm.lib.utils.builders = {} end
 if not apm.lib.utils.builders.smoke then apm.lib.utils.builders.smoke = {} end

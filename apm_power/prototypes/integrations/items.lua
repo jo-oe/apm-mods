@@ -69,9 +69,9 @@ if mods.bobpower and apm_power_compat_bob then
 	end
 end
 
-if mods["aai-industry"] and apm_power_compat_earendel then
-	apm.lib.utils.item.remove("sand")
-end
+-- if mods["aai-industry"] and apm_power_compat_earendel then
+-- apm.lib.utils.item.remove("sand")
+-- end
 
 --- [bobs]
 if apm_power_compat_bob then
@@ -81,6 +81,9 @@ end
 --- [SafTheLamb]
 ---
 --- [wood-logistics]
+if mods["wood-logistics"] then
+	require("prototypes.integrations.items.wood-logistics")
+end
 
 --- [crushing-industry]
 if mods["crushing-industry"] then
@@ -91,6 +94,11 @@ end
 --- [alloy-smelting]
 if mods["alloy-smelting"] then
 	require("prototypes.integrations.items.alloy-smelting")
+end
+
+--- [wood-industry]
+if mods["wood-industry"] then
+	require("prototypes.integrations.items.wood-industry")
 end
 
 ---
@@ -123,4 +131,9 @@ end
 --- [BZ]
 if mods["bzfoundry2"] then
 	require("prototypes.integrations.items.bzfoundry2")
+end
+
+if mods["Smart_Inserters"] then
+	apm.lib.utils.item.remove("apm_steam_inserter_long")
+	apm.lib.utils.item.remove("apm_burner_long_inserter")
 end
